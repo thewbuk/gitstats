@@ -8,10 +8,6 @@ import { RoomsTab } from './RoomsTab';
 import { FriendsTab } from './FriendsTab';
 import { UserStats } from './UserStats';
 import { CategoryStats } from './CategoryStats';
-import { AirportSearch } from './flights/AirportSearch';
-import { FareSearch } from './flights/FareSearch';
-import { FlightSchedule } from './flights/FlightSchedule';
-import { RepoSearch } from './github/RepoSearch';
 import { RepoList } from './github/RepoList';
 import { RepoStats } from './github/RepoStats';
 import { GithubAuth } from './github/GithubAuth';
@@ -21,6 +17,8 @@ type DashboardProps = {
 };
 
 export const Dashboard = ({ userName }: DashboardProps) => {
+  const [repositories, setRepositories] = React.useState([]);
+
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-primary/5 via-primary/2 to-transparent">
       <div className="mx-auto w-full max-w-7xl px-4 py-8">
@@ -38,30 +36,16 @@ export const Dashboard = ({ userName }: DashboardProps) => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-8 space-y-6">
-            {/* Flight Information Card */}
-            <div className="bg-card rounded-lg p-6 shadow-sm">
-              <h2 className="text-2xl font-semibold mb-4">
-                Flight Information
-              </h2>
-              <div className="space-y-6">
-                <FlightSchedule />
-                <AirportSearch />
-                <FareSearch />
-              </div>
-            </div>
-
             {/* GitHub Repositories Card */}
             <div className="bg-card rounded-lg p-6 shadow-sm">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-semibold">GitHub Repositories</h2>
                 <GithubAuth />
               </div>
-              <div className="space-y-6">
-                <RepoSearch />
-                <RepoList />
-                <RepoStats />
-              </div>
+              <RepoList onRepositoriesChange={setRepositories} />
             </div>
+
+
 
             {/* Activity and Rooms Card */}
             <div className="bg-card rounded-lg p-6 shadow-sm">
@@ -81,6 +65,11 @@ export const Dashboard = ({ userName }: DashboardProps) => {
 
           {/* Right Column - Sidebar */}
           <div className="lg:col-span-4 space-y-6">
+            {/* GitHub Stats Card */}
+            <div className="bg-card rounded-lg p-6 shadow-sm">
+              <RepoStats repositories={repositories} />
+            </div>
+
             {/* Friends Card */}
             <div className="bg-card rounded-lg p-6 shadow-sm">
               <h2 className="text-xl font-semibold mb-4">Friends</h2>
