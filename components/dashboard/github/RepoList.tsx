@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star, GitFork, Eye } from 'lucide-react';
 import { RepoSearch } from './RepoSearch';
-import { getLanguageStats } from '@/lib/github';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type Repository = {
     id: number;
@@ -20,7 +20,6 @@ type Repository = {
         login: string;
         avatar_url: string;
     };
-    languages?: { [key: string]: number };
 };
 
 type RepoListProps = {
@@ -29,42 +28,53 @@ type RepoListProps = {
 
 export const RepoList = ({ onRepositoriesChange }: RepoListProps) => {
     const [repos, setRepos] = useState<Repository[]>([]);
-    const [isLoadingLanguages, setIsLoadingLanguages] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [sort, setSort] = useState('stars');
 
-    useEffect(() => {
-        onRepositoriesChange?.(repos);
-    }, [repos, onRepositoriesChange]);
-
-    const handleSearch = async (searchResults: Repository[]) => {
-        setRepos(searchResults);
-        setIsLoadingLanguages(true);
-
+    const fetchRepos = async (query: string) => {
+        setIsLoading(true);
         try {
-            const token = localStorage.getItem('github_token');
-            const reposWithLanguages = await Promise.all(
-                searchResults.map(async (repo) => {
-                    try {
-                        const languages = await getLanguageStats(repo.owner.login, repo.name, token);
-                        return { ...repo, languages };
-                    } catch (error) {
-                        console.error(`Failed to fetch languages for ${repo.name}:`, error);
-                        return repo;
-                    }
-                })
+            const response = await fetch(
+                `https://api.github.com/search/repositories?q=${query || 'stars:>10000'}&sort=${sort}&order=desc`
             );
-            setRepos(reposWithLanguages);
+            if (!response.ok) {
+                throw new Error('Failed to fetch repositories');
+            }
+            const data = await response.json();
+            setRepos(data.items);
+            onRepositoriesChange?.(data.items);
         } catch (error) {
-            console.error('Failed to fetch languages:', error);
+            console.error('Failed to fetch repositories:', error);
         } finally {
-            setIsLoadingLanguages(false);
+            setIsLoading(false);
         }
     };
 
+    const handleSearch = (query: string) => {
+        fetchRepos(query);
+    };
+
+    const handleSortChange = (newSort: string) => {
+        setSort(newSort);
+        fetchRepos('');
+    };
+
+    // Initial fetch
+    useState(() => {
+        fetchRepos('');
+    });
+
     return (
         <div className="space-y-6">
-            <RepoSearch onSearch={handleSearch} />
+            <RepoSearch onSearch={handleSearch} defaultSort={sort} onSortChange={handleSortChange} />
             <div className="space-y-4">
-                {repos.length === 0 ? (
+                {isLoading ? (
+                    Array(3)
+                        .fill(0)
+                        .map((_, i) => (
+                            <Skeleton key={i} className="h-[200px] rounded-xl" />
+                        ))
+                ) : repos.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                         No repositories found. Try searching above.
                     </div>
@@ -108,19 +118,10 @@ export const RepoList = ({ onRepositoriesChange }: RepoListProps) => {
                                     {repo.watchers_count.toLocaleString()}
                                 </div>
                             </div>
-                            {repo.languages && (
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    {Object.entries(repo.languages).map(([lang, bytes]) => (
-                                        <Badge key={lang} variant="secondary">
-                                            {lang}: {((bytes / Object.values(repo.languages!).reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%
-                                        </Badge>
-                                    ))}
-                                </div>
-                            )}
                         </Card>
                     ))
                 )}
             </div>
         </div>
     );
-}; 
+};

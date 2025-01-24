@@ -3,31 +3,25 @@
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { searchRepositories } from '@/lib/github';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 
 type RepoSearchProps = {
-    onSearch: (repos: any[]) => void;
+    onSearch: (query: string) => void;
+    onSortChange: (sort: string) => void;
+    defaultSort: string;
 };
 
-export const RepoSearch = ({ onSearch }: RepoSearchProps) => {
+export const RepoSearch = ({ onSearch, onSortChange, defaultSort }: RepoSearchProps) => {
     const [query, setQuery] = useState('');
-    const [sort, setSort] = useState('stars');
-    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSearch = async () => {
-        if (!query.trim()) return;
-
-        setIsLoading(true);
-        try {
-            const token = localStorage.getItem('github_token');
-            const result = await searchRepositories(query, sort, token);
-            onSearch(result.items);
-        } catch (error) {
-            console.error('Search failed:', error);
-        } finally {
-            setIsLoading(false);
-        }
+    const handleSearch = () => {
+        onSearch(query);
     };
 
     return (
@@ -40,7 +34,7 @@ export const RepoSearch = ({ onSearch }: RepoSearchProps) => {
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 />
-                <Select value={sort} onValueChange={setSort}>
+                <Select defaultValue={defaultSort} onValueChange={onSortChange}>
                     <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Sort by" />
                     </SelectTrigger>
@@ -50,17 +44,60 @@ export const RepoSearch = ({ onSearch }: RepoSearchProps) => {
                         <SelectItem value="updated">Last Updated</SelectItem>
                     </SelectContent>
                 </Select>
-                <Button onClick={handleSearch} disabled={isLoading}>
-                    {isLoading ? 'Searching...' : 'Search'}
-                </Button>
+                <Button onClick={handleSearch}>Search</Button>
             </div>
             <div className="flex gap-2 flex-wrap">
-                <Button variant="outline" size="sm" onClick={() => setQuery('language:javascript')}>JavaScript</Button>
-                <Button variant="outline" size="sm" onClick={() => setQuery('language:typescript')}>TypeScript</Button>
-                <Button variant="outline" size="sm" onClick={() => setQuery('language:python')}>Python</Button>
-                <Button variant="outline" size="sm" onClick={() => setQuery('language:java')}>Java</Button>
-                <Button variant="outline" size="sm" onClick={() => setQuery('')}>Clear</Button>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                        setQuery('language:javascript');
+                        onSearch('language:javascript');
+                    }}
+                >
+                    JavaScript
+                </Button>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                        setQuery('language:typescript');
+                        onSearch('language:typescript');
+                    }}
+                >
+                    TypeScript
+                </Button>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                        setQuery('language:python');
+                        onSearch('language:python');
+                    }}
+                >
+                    Python
+                </Button>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                        setQuery('language:java');
+                        onSearch('language:java');
+                    }}
+                >
+                    Java
+                </Button>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                        setQuery('');
+                        onSearch('');
+                    }}
+                >
+                    Clear
+                </Button>
             </div>
         </div>
     );
-}; 
+};

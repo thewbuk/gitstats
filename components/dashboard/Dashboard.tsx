@@ -45,8 +45,6 @@ export const Dashboard = ({ userName }: DashboardProps) => {
               <RepoList onRepositoriesChange={setRepositories} />
             </div>
 
-
-
             {/* Activity and Rooms Card */}
             <div className="bg-card rounded-lg p-6 shadow-sm">
               <h2 className="text-2xl font-semibold mb-4">Activity & Rooms</h2>

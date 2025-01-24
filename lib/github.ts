@@ -6,7 +6,7 @@ export async function searchRepositories(query: string, sort: string = 'stars', 
   };
 
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers['Authorization'] = `token ${token}`;
   }
 
   const response = await fetch(
@@ -19,7 +19,8 @@ export async function searchRepositories(query: string, sort: string = 'stars', 
   );
 
   if (!response.ok) {
-    throw new Error('Failed to fetch repositories');
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.error || 'Failed to fetch repositories');
   }
 
   return response.json();
@@ -31,7 +32,7 @@ export async function getLanguageStats(owner: string, repo: string, token: strin
   };
 
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers['Authorization'] = `token ${token}`;
   }
 
   const response = await fetch(
@@ -44,7 +45,8 @@ export async function getLanguageStats(owner: string, repo: string, token: strin
   );
 
   if (!response.ok) {
-    throw new Error('Failed to fetch language statistics');
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.error || 'Failed to fetch language statistics');
   }
 
   return response.json();
@@ -56,7 +58,7 @@ export async function getRepository(owner: string, repo: string, token: string |
   };
 
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers['Authorization'] = `token ${token}`;
   }
 
   const response = await fetch(
@@ -69,7 +71,8 @@ export async function getRepository(owner: string, repo: string, token: string |
   );
 
   if (!response.ok) {
-    throw new Error('Failed to fetch repository details');
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.error || 'Failed to fetch repository details');
   }
 
   return response.json();

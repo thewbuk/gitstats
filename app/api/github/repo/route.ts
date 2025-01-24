@@ -1,36 +1,39 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 const GITHUB_API_URL = 'https://api.github.com';
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const owner = searchParams.get('owner');
-  const repo = searchParams.get('repo');
-  const token = request.headers.get('Authorization')?.replace('Bearer ', '');
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
 
-  if (!owner || !repo) {
-    return NextResponse.json(
-      { error: 'Owner and repo parameters are required' },
-      { status: 400 }
-    );
-  }
-
-  const headers: HeadersInit = {
-    'Accept': 'application/vnd.github.v3+json',
-    'User-Agent': 'GitHub-Repository-Explorer',
-  };
-
-  if (token) {
-    headers['Authorization'] = `token ${token}`;
-  }
-
+export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const owner = searchParams.get('owner');
+    const repo = searchParams.get('repo');
+    const token = req.headers.get('Authorization')?.replace('Bearer ', '');
+
+    if (!owner || !repo) {
+      return NextResponse.json(
+        { error: 'Owner and repo parameters are required' },
+        { status: 400 }
+      );
+    }
+
+    const headers: HeadersInit = {
+      Accept: 'application/vnd.github.v3+json',
+      'User-Agent': 'GitHub-Repository-Explorer',
+    };
+
+    if (token) {
+      headers['Authorization'] = `token ${token}`;
+    }
+
     const response = await fetch(
       `${GITHUB_API_URL}/repos/${owner}/${repo}`,
-      { 
+      {
         headers,
         method: 'GET',
-        cache: 'no-store'
+        cache: 'no-store',
       }
     );
 
@@ -52,4 +55,4 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-} 
+}
