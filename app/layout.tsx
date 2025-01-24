@@ -1,39 +1,85 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { Header } from "@/app/components/header";
-import { Providers } from "./providers";
-import "@/styles/globals.css";
+import type { Metadata, Viewport } from 'next';
+import { Space_Grotesk as SpaceGrotesk } from 'next/font/google';
+import { Footer } from '@/components/footer';
+import { TailwindIndicator } from '@/components/tailwind-indicator';
+import { ThemeProvider } from '@/components/theme-provider';
+import NextTopLoader from 'nextjs-toploader';
+import { Analytics } from '@vercel/analytics/next';
+import { Toaster } from 'sonner';
 
-const geistSans = Geist({
-    variable: "--font-geist-sans",
-    subsets: ["latin"],
-});
+import '@/styles/globals.css';
+import { SiteHeader } from '@/components/navbar/SiteHeader';
 
-const geistMono = Geist_Mono({
-    variable: "--font-geist-mono",
-    subsets: ["latin"],
-});
+const spaceGrotesk = SpaceGrotesk({ subsets: ['latin'] });
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: 'white' },
+    { media: '(prefers-color-scheme: dark)', color: 'black' },
+  ],
+};
 
 export const metadata: Metadata = {
-    title: "GitHub Explorer",
-    description: "Explore GitHub repositories",
+  title: {
+    default: 'Git',
+    template: 'Git fetch',
+  },
+  description: 'Fetch git repos',
 };
 
 export default function RootLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
-    return (
-        <html lang="en" suppressHydrationWarning>
-            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-                <Providers>
-                    <div className="min-h-screen bg-background">
-                        <Header />
-                        <main className="container mx-auto py-6 px-4">{children}</main>
-                    </div>
-                </Providers>
-            </body>
-        </html>
-    );
-} 
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" className={spaceGrotesk.className} suppressHydrationWarning>
+      <head>
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
+        <meta name="msapplication-TileColor" content="#da532c" />
+        <meta name="theme-color" content="#ffffff" />
+      </head>
+      <body className="min-h-screen bg-background font-sans antialiased">
+        <Analytics />
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <NextTopLoader
+            color="#2299DD"
+            initialPosition={0.08}
+            crawlSpeed={200}
+            height={3}
+            crawl={true}
+            showSpinner={true}
+            easing="ease"
+            speed={200}
+            shadow="0 0 10px #2299DD,0 0 5px #2299DD"
+          />
+          <SiteHeader />
+          <div className="relative flex min-h-screen flex-col">
+            <div className="flex-1">{children}</div>
+          </div>
+          <Footer />
+          <TailwindIndicator />
+          <Toaster />
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
