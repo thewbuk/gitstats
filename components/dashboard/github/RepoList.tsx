@@ -6,21 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Star, GitFork, Eye } from 'lucide-react';
 import { RepoSearch } from './RepoSearch';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Repository } from '../Dashboard';
 
-type Repository = {
-    id: number;
-    name: string;
-    description: string;
-    language: string;
-    stargazers_count: number;
-    forks_count: number;
-    watchers_count: number;
-    html_url: string;
-    owner: {
-        login: string;
-        avatar_url: string;
-    };
-};
 
 type RepoListProps = {
     onRepositoriesChange?: (repos: Repository[]) => void;

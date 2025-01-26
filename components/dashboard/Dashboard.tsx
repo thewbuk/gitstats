@@ -12,12 +12,28 @@ import { RepoList } from './github/RepoList';
 import { RepoStats } from './github/RepoStats';
 import { GithubAuth } from './github/GithubAuth';
 
+export type Repository = {
+  id: number;
+  name: string;
+  description: string;
+  language: string;
+  stargazers_count: number;
+  forks_count: number;
+  watchers_count: number;
+  html_url: string;
+  owner: {
+    login: string;
+    avatar_url: string;
+  };
+  languages?: { [key: string]: number };
+};
+
 type DashboardProps = {
   userName?: string | null;
 };
 
 export const Dashboard = ({ userName }: DashboardProps) => {
-  const [repositories, setRepositories] = React.useState([]);
+  const [repositories, setRepositories] = React.useState<Repository[]>([]);
 
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-primary/5 via-primary/2 to-transparent">
