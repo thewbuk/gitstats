@@ -61,20 +61,6 @@ export const Dashboard = ({ userName }: DashboardProps) => {
               <RepoList onRepositoriesChange={setRepositories} />
             </div>
 
-            {/* Activity and Rooms Card */}
-            <div className="bg-card rounded-lg p-6 shadow-sm">
-              <h2 className="text-2xl font-semibold mb-4">Activity & Rooms</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-lg font-medium mb-3">Recent Activity</h3>
-                  <ActivityTab />
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium mb-3">My Rooms</h3>
-                  <RoomsTab />
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Right Column - Sidebar */}
