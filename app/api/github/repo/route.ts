@@ -28,14 +28,11 @@ export async function GET(req: NextRequest) {
       headers['Authorization'] = `token ${token}`;
     }
 
-    const response = await fetch(
-      `${GITHUB_API_URL}/repos/${owner}/${repo}`,
-      {
-        headers,
-        method: 'GET',
-        cache: 'no-store',
-      }
-    );
+    const response = await fetch(`${GITHUB_API_URL}/repos/${owner}/${repo}`, {
+      headers,
+      method: 'GET',
+      cache: 'no-store',
+    });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
