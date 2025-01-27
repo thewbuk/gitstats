@@ -36,7 +36,11 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className={spaceGrotesk.className} suppressHydrationWarning>
+      <html
+        lang="en"
+        className={spaceGrotesk.className}
+        suppressHydrationWarning
+      >
         <head>
           <link
             rel="apple-touch-icon"

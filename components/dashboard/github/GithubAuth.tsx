@@ -35,7 +35,9 @@ export const GithubAuth = () => {
             await login(token);
             setIsOpen(false);
         } catch (error) {
-            setError(error instanceof Error ? error.message : 'Authentication failed');
+            setError(
+                error instanceof Error ? error.message : 'Authentication failed'
+            );
         } finally {
             setIsLoading(false);
         }
@@ -54,13 +56,17 @@ export const GithubAuth = () => {
             <DialogTrigger asChild>
                 <Button variant="outline">Login with GitHub</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px] z-40">
                 <DialogHeader>
                     <DialogTitle>GitHub Authentication</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                     <SignInButton mode="modal">
-                        <Button variant="outline" className="w-full flex items-center">
+                        <Button
+                            variant="outline"
+                            className="w-full flex items-center"
+                            onClick={() => setIsOpen(false)}
+                        >
                             <Github className="mr-2 h-4 w-4" />
                             Continue with GitHub
                         </Button>
@@ -99,7 +105,8 @@ export const GithubAuth = () => {
                                     Under "Permissions" expand "Repository permissions" and set:
                                     <ul className="list-disc list-inside ml-4 text-xs space-y-1">
                                         <li>
-                                            Contents: <span className="font-semibold">Read and write</span>
+                                            Contents:{' '}
+                                            <span className="font-semibold">Read and write</span>
                                         </li>
                                         <li>
                                             Metadata: <span className="font-semibold">Read-only</span>
@@ -110,7 +117,8 @@ export const GithubAuth = () => {
                                 <li>Copy and paste the token here (you won't see it again)</li>
                             </ol>
                             <p className="text-xs mt-2 text-yellow-500">
-                                Note: Make sure to select "All repositories" to access private repos
+                                Note: Make sure to select "All repositories" to access private
+                                repos
                             </p>
                         </div>
                         <Input

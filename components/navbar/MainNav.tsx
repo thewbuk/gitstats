@@ -1,12 +1,8 @@
 'use client';
-import {
-  GitGraph
-} from 'lucide-react';
+import { GitGraph } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import {
-  NavigationMenuLink
-} from '@/components/ui/navigation-menu';
+import { NavigationMenuLink } from '@/components/ui/navigation-menu';
 import * as React from 'react';
 
 type Category = {
@@ -20,7 +16,6 @@ type MainNavProps = {
 };
 
 export function MainNav({ categories }: MainNavProps) {
-
   return (
     <div className="mr-4 hidden xl:flex">
       <Link href="/" className="mr-6 flex items-center space-x-2">
