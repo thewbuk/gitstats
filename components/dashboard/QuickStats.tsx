@@ -68,7 +68,10 @@ export const QuickStats = () => {
         repoCount: allRepos.length,
         followerCount: userData.followers,
         contributionCount: allRepos.filter((repo: any) => !repo.fork).length,
-        commitCount: allRepos.reduce((acc: number, repo: any) => acc + repo.size, 0),
+        commitCount: allRepos.reduce(
+          (acc: number, repo: any) => acc + repo.size,
+          0
+        ),
       });
     } catch (error) {
       console.error('Failed to fetch GitHub stats:', error);
@@ -81,22 +84,22 @@ export const QuickStats = () => {
     {
       title: 'Repositories',
       value: isAuthenticated ? stats.repoCount : '?',
-      icon: CalendarDays
+      icon: CalendarDays,
     },
     {
       title: 'Followers',
       value: isAuthenticated ? stats.followerCount : '?',
-      icon: Users
+      icon: Users,
     },
     {
       title: 'Contributions',
       value: isAuthenticated ? stats.contributionCount : '?',
-      icon: Video
+      icon: Video,
     },
     {
       title: 'Total Commits',
       value: isAuthenticated ? stats.commitCount : '?',
-      icon: History
+      icon: History,
     },
   ];
 
