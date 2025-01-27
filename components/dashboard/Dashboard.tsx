@@ -60,7 +60,6 @@ export const Dashboard = ({ userName }: DashboardProps) => {
               </div>
               <RepoList onRepositoriesChange={setRepositories} />
             </div>
-
           </div>
 
           {/* Right Column - Sidebar */}

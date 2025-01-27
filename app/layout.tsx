@@ -3,6 +3,7 @@ import { Space_Grotesk as SpaceGrotesk } from 'next/font/google';
 import { Footer } from '@/components/footer';
 import { TailwindIndicator } from '@/components/tailwind-indicator';
 import { ThemeProvider } from '@/components/theme-provider';
+import { GithubAuthProvider } from '@/components/providers/github-auth-provider';
 import NextTopLoader from 'nextjs-toploader';
 import { Analytics } from '@vercel/analytics/next';
 import { Toaster } from 'sonner';
@@ -65,24 +66,26 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <NextTopLoader
-            color="#2299DD"
-            initialPosition={0.08}
-            crawlSpeed={200}
-            height={3}
-            crawl={true}
-            showSpinner={true}
-            easing="ease"
-            speed={200}
-            shadow="0 0 10px #2299DD,0 0 5px #2299DD"
-          />
-          <SiteHeader />
-          <div className="relative flex min-h-screen flex-col">
-            <div className="flex-1">{children}</div>
-          </div>
-          <Footer />
-          <TailwindIndicator />
-          <Toaster />
+          <GithubAuthProvider>
+            <NextTopLoader
+              color="#2299DD"
+              initialPosition={0.08}
+              crawlSpeed={200}
+              height={3}
+              crawl={true}
+              showSpinner={true}
+              easing="ease"
+              speed={200}
+              shadow="0 0 10px #2299DD,0 0 5px #2299DD"
+            />
+            <SiteHeader />
+            <div className="relative flex min-h-screen flex-col">
+              <div className="flex-1">{children}</div>
+            </div>
+            <Footer />
+            <TailwindIndicator />
+            <Toaster />
+          </GithubAuthProvider>
         </ThemeProvider>
       </body>
     </html>
