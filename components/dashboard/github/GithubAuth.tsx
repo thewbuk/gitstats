@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Loader2, Github } from 'lucide-react';
 import { useGithubAuth } from '@/components/providers/github-auth-provider';
-import { SignInButton } from '@clerk/nextjs';
+import { useAuth, useClerk } from '@clerk/nextjs';
 import { Separator } from '@/components/ui/separator';
 
 export const GithubAuth = () => {
@@ -21,6 +21,8 @@ export const GithubAuth = () => {
   const [error, setError] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const { isAuthenticated, login, logout } = useGithubAuth();
+  const { isSignedIn } = useAuth();
+  const { openSignIn } = useClerk();
 
   const handleLogin = async () => {
     if (!token) {
@@ -43,10 +45,23 @@ export const GithubAuth = () => {
     }
   };
 
+  const handleOAuthClick = () => {
+    openSignIn({
+      redirectUrl: `${window.location.origin}/sso-callback`,
+      appearance: {
+        elements: {
+          rootBox: 'w-full',
+          card: 'w-full',
+        },
+      },
+    });
+    setIsOpen(false);
+  };
+
   if (isAuthenticated) {
     return (
       <Button variant="outline" onClick={logout}>
-        Logout
+        Disconnect GitHub
       </Button>
     );
   }
@@ -54,23 +69,21 @@ export const GithubAuth = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Login with GitHub</Button>
+        <Button variant="outline">Connect GitHub</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] z-[9999]">
         <DialogHeader>
           <DialogTitle>GitHub Authentication</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <SignInButton mode="modal">
-            <Button
-              variant="outline"
-              className="w-full flex items-center"
-              onClick={() => setIsOpen(false)}
-            >
-              <Github className="mr-2 h-4 w-4" />
-              Continue with GitHub
-            </Button>
-          </SignInButton>
+          <Button
+            variant="outline"
+            className="w-full flex items-center"
+            onClick={handleOAuthClick}
+          >
+            <Github className="mr-2 h-4 w-4" />
+            {isSignedIn ? 'Connect GitHub Account' : 'Sign in with GitHub'}
+          </Button>
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -98,27 +111,55 @@ export const GithubAuth = () => {
                     GitHub Fine-grained Token Settings
                   </a>
                 </li>
-                <li>Click "Generate new token"</li>
+                <li>Click &quot;Generate new token&quot;</li>
                 <li>Set a token name and expiration</li>
-                <li>Under "Repository access" select "All repositories"</li>
                 <li>
-                  Under "Permissions" expand "Repository permissions" and set:
+                  Under &quot;Repository access&quot; select &quot;All
+                  repositories&quot;
+                </li>
+                <li>
+                  Under &quot;Permissions&quot; expand &quot;Repository
+                  permissions&quot; and set:
                   <ul className="list-disc list-inside ml-4 text-xs space-y-1">
+                    <li className="font-medium">Required scopes:</li>
                     <li>
-                      Contents:{' '}
-                      <span className="font-semibold">Read and write</span>
+                      Contents: <span className="font-semibold">Read-only</span>
                     </li>
                     <li>
                       Metadata: <span className="font-semibold">Read-only</span>
                     </li>
+                    <li className="font-medium mt-2">
+                      Optional scopes for full features:
+                    </li>
+                    <li>
+                      Followers:{' '}
+                      <span className="font-semibold">Read-only</span>
+                    </li>
+                    <li>
+                      Pull requests:{' '}
+                      <span className="font-semibold">Read-only</span>
+                    </li>
+                    <li>
+                      Issues: <span className="font-semibold">Read-only</span>
+                    </li>
+                    <li>
+                      Commit statuses:{' '}
+                      <span className="font-semibold">Read-only</span>
+                    </li>
+                    <li>
+                      Repository hooks:{' '}
+                      <span className="font-semibold">Read-only</span>
+                    </li>
                   </ul>
                 </li>
-                <li>Click "Generate token"</li>
-                <li>Copy and paste the token here (you won't see it again)</li>
+                <li>Click &quot;Generate token&quot;</li>
+                <li>
+                  Copy and paste the token here (you won&apos;t see it again)
+                </li>
               </ol>
               <p className="text-xs mt-2 text-yellow-500">
-                Note: Make sure to select "All repositories" to access private
-                repos
+                Note: Using GitHub OAuth login (recommended) will automatically
+                set correct permissions
               </p>
             </div>
             <Input
@@ -140,7 +181,7 @@ export const GithubAuth = () => {
                   Verifying...
                 </>
               ) : (
-                'Login with Token'
+                'Connect with Token'
               )}
             </Button>
           </div>

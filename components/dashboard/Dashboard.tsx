@@ -9,6 +9,8 @@ import { GithubAuth } from './github/GithubAuth';
 import { FollowersTab } from './github/FollowersTab';
 import { LanguageStats } from './github/LanguageStats';
 import { CommitActivityStats } from './github/CommitActivityStats';
+import { CommitActivityChart } from './github/CommitActivityChart';
+import { RepoActivityChart } from './github/RepoActivityChart';
 
 export type Repository = {
   id: number;
@@ -57,6 +59,12 @@ export const Dashboard = ({ userName }: DashboardProps) => {
                 <GithubAuth />
               </div>
               <RepoList onRepositoriesChange={setRepositories} />
+            </div>
+
+            {/* Activity Charts */}
+            <div className="grid grid-cols-1 gap-6">
+              <CommitActivityChart />
+              <RepoActivityChart />
             </div>
           </div>
 

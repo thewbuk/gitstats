@@ -41,10 +41,16 @@ export const FollowersTab = () => {
           'X-GitHub-Api-Version': '2022-11-28',
         },
       });
+      if (!response.ok) {
+        throw new Error(
+          'Failed to fetch followers. You might need additional scopes.'
+        );
+      }
       const data = await response.json();
-      setFollowers(data);
+      setFollowers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch followers:', error);
+      setFollowers([]);
     } finally {
       setLoading(false);
     }
@@ -55,7 +61,10 @@ export const FollowersTab = () => {
       <Card>
         <CardHeader>
           <CardTitle>GitHub Followers</CardTitle>
-          <CardDescription>Login to see your followers</CardDescription>
+          <CardDescription>
+            Login with GitHub (recommended) or a token with
+            &apos;read:user&apos; scope to see your followers
+          </CardDescription>
         </CardHeader>
       </Card>
     );

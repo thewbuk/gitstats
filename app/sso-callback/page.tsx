@@ -1,37 +1,35 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useSignIn } from '@clerk/nextjs';
+import { useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 
 export default function SSOCallback() {
-  const { signIn, isLoaded } = useSignIn();
+  const { handleRedirectCallback } = useClerk();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoaded) return;
-
-    async function handleCallback() {
+    const handle = async () => {
       try {
-        const handledResponse = await signIn.handleRedirectCallback();
-        if (handledResponse) {
-          router.push('/');
-        }
+        await handleRedirectCallback({
+          redirectUrl: window.location.origin,
+          afterSignInUrl: '/',
+        });
       } catch (err) {
-        console.error('Error during OAuth callback:', err);
+        console.error('Error handling SSO callback:', err);
         router.push('/');
       }
-    }
+    };
 
-    handleCallback();
-  }, [isLoaded, signIn, router]);
+    handle();
+  }, [handleRedirectCallback, router]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex items-center justify-center min-h-screen">
       <div className="text-center">
-        <h1 className="text-2xl font-bold">Completing sign in...</h1>
+        <h2 className="text-xl font-semibold mb-2">Completing sign in...</h2>
         <p className="text-muted-foreground">
-          Please wait while we complete your sign in.
+          Please wait while we redirect you.
         </p>
       </div>
     </div>
