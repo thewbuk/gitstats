@@ -56,7 +56,7 @@ export const GithubAuth = () => {
             <DialogTrigger asChild>
                 <Button variant="outline">Login with GitHub</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] z-40">
+            <DialogContent className="sm:max-w-[425px] z-[9999]">
                 <DialogHeader>
                     <DialogTitle>GitHub Authentication</DialogTitle>
                 </DialogHeader>

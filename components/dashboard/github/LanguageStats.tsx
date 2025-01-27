@@ -157,7 +157,7 @@ export function LanguageStats() {
                             <ChartTooltip
                                 cursor={false}
                                 content={(props) => (
-                                    <ChartTooltipContent>
+                                    <ChartTooltipContent className="bg-background">
                                         {props.payload?.[0]?.value
                                             ? `${(Number(props.payload[0].value) / 1000).toFixed(1)}K bytes`
                                             : ''}
@@ -167,8 +167,8 @@ export function LanguageStats() {
                             <Bar
                                 dataKey="bytes"
                                 radius={[4, 4, 4, 4]}
-                                fill="currentColor"
-                                className="fill-primary"
+                                fill="hsl(var(--background))"
+                                background={{ fill: "fill" }}
                             />
                         </BarChart>
                     </ChartContainer>
