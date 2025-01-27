@@ -3,14 +3,12 @@
 import * as React from 'react';
 import { WelcomeSection } from './WelcomeSection';
 import { QuickStats } from './QuickStats';
-import { ActivityTab } from './ActivityTab';
-import { RoomsTab } from './RoomsTab';
-import { FriendsTab } from './FriendsTab';
-import { UserStats } from './UserStats';
-import { CategoryStats } from './CategoryStats';
 import { RepoList } from './github/RepoList';
 import { RepoStats } from './github/RepoStats';
 import { GithubAuth } from './github/GithubAuth';
+import { FollowersTab } from './github/FollowersTab';
+import { LanguageStats } from './github/LanguageStats';
+import { CommitActivityStats } from './github/CommitActivityStats';
 
 export type Repository = {
   id: number;
@@ -72,18 +70,18 @@ export const Dashboard = ({ userName }: DashboardProps) => {
             {/* Friends Card */}
             <div className="bg-card rounded-lg p-6 shadow-sm">
               <h2 className="text-xl font-semibold mb-4">Friends</h2>
-              <FriendsTab />
+              <FollowersTab />
             </div>
 
             {/* Stats Cards */}
             <div className="space-y-6">
               <div className="bg-card rounded-lg p-6 shadow-sm">
                 <h2 className="text-xl font-semibold mb-4">User Statistics</h2>
-                <UserStats />
+                <CommitActivityStats />
               </div>
               <div className="bg-card rounded-lg p-6 shadow-sm">
                 <h2 className="text-xl font-semibold mb-4">Categories</h2>
-                <CategoryStats />
+                <LanguageStats />
               </div>
             </div>
           </div>

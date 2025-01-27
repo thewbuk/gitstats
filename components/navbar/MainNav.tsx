@@ -1,25 +1,11 @@
 'use client';
 import {
-  Youtube,
-  Home,
-  List,
-  Book,
-  Tv,
-  Plus,
-  Coins,
-  PlaneTakeoff,
+  GitGraph
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
+  NavigationMenuLink
 } from '@/components/ui/navigation-menu';
 import * as React from 'react';
 
@@ -34,13 +20,12 @@ type MainNavProps = {
 };
 
 export function MainNav({ categories }: MainNavProps) {
-  const router = useRouter();
 
   return (
     <div className="mr-4 hidden xl:flex">
       <Link href="/" className="mr-6 flex items-center space-x-2">
-        <PlaneTakeoff className="h-6 w-6" />
-        <span className="font-bold">Flighty</span>
+        <GitGraph className="h-6 w-6" />
+        <span className="font-bold">GitStats</span>
       </Link>
       <nav className="flex items-center gap-4 text-sm lg:gap-6">
         {/* <NavigationMenu>
