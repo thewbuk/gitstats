@@ -1,7 +1,8 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { DiscordLogoIcon } from '@radix-ui/react-icons';
-import { Clapperboard, History } from 'lucide-react';
+import { Clapperboard, GitBranchIcon, GitGraph, History } from 'lucide-react';
+import { Icons } from './common/icons';
 
 export const Footer = () => {
   return (
@@ -9,30 +10,30 @@ export const Footer = () => {
       <div className="border-t p-4">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-0">
           <div className="flex items-center gap-2">
-            <Clapperboard size={20} />
-            <h2 className="text-md font-normal">Cyclon</h2>
+            <GitGraph size={20} />
+            <h2 className="text-md font-normal">GitStats</h2>
           </div>
 
           <div className="flex items-center gap-2">
-            <p className="text-xs text-muted-foreground"> 2024</p>
+            <p className="text-xs text-muted-foreground"> 2025</p>
 
             <div className="h-3 border-r" />
 
             <span className="text-xs text-muted-foreground">
-              Data provided by YouTube
+              Data provided by GitHub
             </span>
           </div>
 
           <div className="flex items-center gap-2 [&_a]:rounded-full [&_a]:border [&_a]:px-3 [&_a]:py-1 [&_a]:shadow">
-            <Link href="/changelog" className="flex items-center gap-1">
-              <History size={16} />
-            </Link>
-
             <Link
-              href="https://discord.gg/6Hjumj65"
-              className="flex items-center gap-1"
+              href={'https://github.com/thewbuk/gitstats'}
+              target="_blank"
+              rel="noreferrer"
             >
-              <DiscordLogoIcon className="h-4 w-4" />
+              <div className="flex items-center gap-1">
+                <Icons.gitHub className="h-5 w-5" />
+                <span className="sr-only">GitHub</span>
+              </div>
             </Link>
           </div>
         </div>
