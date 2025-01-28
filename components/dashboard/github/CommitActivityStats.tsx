@@ -97,7 +97,9 @@ export function CommitActivityStats() {
     return (
       <Card>
         <CardContent className="pt-6">
-          <p className="text-sm text-muted-foreground">Please sign in to view commit statistics.</p>
+          <p className="text-sm text-muted-foreground">
+            Please sign in to view commit statistics.
+          </p>
         </CardContent>
       </Card>
     );

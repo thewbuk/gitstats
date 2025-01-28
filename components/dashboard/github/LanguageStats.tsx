@@ -110,7 +110,9 @@ export function LanguageStats() {
     return (
       <Card className="col-span-4">
         <CardContent className="pt-6">
-          <p className="text-sm text-muted-foreground">Please sign in to view language statistics.</p>
+          <p className="text-sm text-muted-foreground">
+            Please sign in to view language statistics.
+          </p>
         </CardContent>
       </Card>
     );

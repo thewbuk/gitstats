@@ -5,18 +5,17 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   try {
     const { userId } = await auth();
-    console.log('Auth data - userId:', userId);
 
     if (!userId) {
-      console.log('No userId found');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     console.log('Fetching token for userId:', userId);
-    const tokens = await clerkClient.users.getUserOauthAccessToken(userId, 'oauth_github');
-    console.log('Tokens response:', tokens);
+    const tokens = await clerkClient.users.getUserOauthAccessToken(
+      userId,
+      'oauth_github'
+    );
     const token = tokens.data[0];
-    console.log('Token object:', token);
 
     if (!token) {
       console.log('No token found');
@@ -28,19 +27,20 @@ export async function GET() {
 
     // Test the token with GitHub API
     const authHeader = `Basic ${Buffer.from(`Bearer ${token.token}`).toString('base64')}`;
-    console.log('Using auth header:', authHeader);
-    
+
     // Check rate limit first
     const rateLimit = await fetch('https://api.github.com/rate_limit', {
       headers: {
         Authorization: authHeader,
         Accept: 'application/vnd.github.v3+json',
-        'User-Agent': 'biotech-app'
-      }
+        'User-Agent': 'biotech-app',
+      },
     });
 
     if (rateLimit.status === 403) {
-      const resetTime = new Date(Number(rateLimit.headers.get('x-ratelimit-reset')) * 1000);
+      const resetTime = new Date(
+        Number(rateLimit.headers.get('x-ratelimit-reset')) * 1000
+      );
       return NextResponse.json(
         { error: `Rate limit exceeded. Resets at ${resetTime.toISOString()}` },
         { status: 403 }
@@ -52,22 +52,20 @@ export async function GET() {
       headers: {
         Authorization: authHeader,
         Accept: 'application/vnd.github.v3+json',
-        'User-Agent': 'biotech-app'
+        'User-Agent': 'biotech-app',
       },
     });
 
-    console.log('GitHub response status:', githubResponse.status);
     const responseText = await githubResponse.text();
-    console.log('GitHub response:', responseText);
 
     if (!githubResponse.ok) {
       try {
         const errorJson = JSON.parse(responseText);
         return NextResponse.json(
-          { 
+          {
             error: 'Invalid GitHub token',
             details: errorJson.message,
-            documentation: errorJson.documentation_url 
+            documentation: errorJson.documentation_url,
           },
           { status: githubResponse.status }
         );
@@ -87,4 +85,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-} 
+}

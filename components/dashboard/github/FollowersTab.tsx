@@ -32,12 +32,15 @@ export function FollowersTab() {
           const { token } = await tokenResponse.json();
           if (!token) return;
 
-          const response = await fetch('https://api.github.com/user/followers', {
-            headers: {
-              Authorization: `token ${token}`,
-              Accept: 'application/vnd.github.v3+json',
-            },
-          });
+          const response = await fetch(
+            'https://api.github.com/user/followers',
+            {
+              headers: {
+                Authorization: `token ${token}`,
+                Accept: 'application/vnd.github.v3+json',
+              },
+            }
+          );
 
           if (!response.ok) {
             throw new Error('Failed to fetch followers');
@@ -57,7 +60,9 @@ export function FollowersTab() {
   if (!user) {
     return (
       <div className="p-4">
-        <p className="text-sm text-muted-foreground">Please sign in to view your followers.</p>
+        <p className="text-sm text-muted-foreground">
+          Please sign in to view your followers.
+        </p>
       </div>
     );
   }

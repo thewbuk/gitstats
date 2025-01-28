@@ -86,7 +86,9 @@ export function CommitActivityChart() {
     return (
       <Card className="col-span-4">
         <CardContent className="pt-6">
-          <p className="text-sm text-muted-foreground">Please sign in to view commit activity.</p>
+          <p className="text-sm text-muted-foreground">
+            Please sign in to view commit activity.
+          </p>
         </CardContent>
       </Card>
     );

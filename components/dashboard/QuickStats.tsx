@@ -52,7 +52,9 @@ export function QuickStats() {
           setGithubUser(data);
         } catch (error) {
           console.error('Failed to fetch GitHub data:', error);
-          setError(error instanceof Error ? error.message : 'An error occurred');
+          setError(
+            error instanceof Error ? error.message : 'An error occurred'
+          );
           setIsLoading(false);
         }
       } else {
