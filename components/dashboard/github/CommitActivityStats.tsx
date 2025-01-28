@@ -97,14 +97,16 @@ export function CommitActivityStats() {
     const mockStats = {
       total: 234,
       weekly: 15,
-      daily: 2
+      daily: 2,
     };
 
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Commits (Demo)</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Commits (Demo)
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{mockStats.total}</div>
@@ -112,7 +114,9 @@ export function CommitActivityStats() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Weekly Commits (Demo)</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Weekly Commits (Demo)
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{mockStats.weekly}</div>
@@ -120,7 +124,9 @@ export function CommitActivityStats() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Daily Average (Demo)</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Daily Average (Demo)
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{mockStats.daily}</div>

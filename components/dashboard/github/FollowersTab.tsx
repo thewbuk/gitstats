@@ -59,9 +59,21 @@ export function FollowersTab() {
 
   if (!user) {
     const mockFollowers = [
-      { login: 'user1', avatar_url: 'https://avatars.githubusercontent.com/u/1?v=4', html_url: 'https://github.com/user1' },
-      { login: 'user2', avatar_url: 'https://avatars.githubusercontent.com/u/2?v=4', html_url: 'https://github.com/user2' },
-      { login: 'user3', avatar_url: 'https://avatars.githubusercontent.com/u/3?v=4', html_url: 'https://github.com/user3' },
+      {
+        login: 'user1',
+        avatar_url: 'https://avatars.githubusercontent.com/u/1?v=4',
+        html_url: 'https://github.com/user1',
+      },
+      {
+        login: 'user2',
+        avatar_url: 'https://avatars.githubusercontent.com/u/2?v=4',
+        html_url: 'https://github.com/user2',
+      },
+      {
+        login: 'user3',
+        avatar_url: 'https://avatars.githubusercontent.com/u/3?v=4',
+        html_url: 'https://github.com/user3',
+      },
     ];
 
     return (
@@ -74,7 +86,12 @@ export function FollowersTab() {
             </Avatar>
             <div className="ml-4 space-y-1">
               <p className="text-sm font-medium leading-none">
-                <a href={follower.html_url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                <a
+                  href={follower.html_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
                   {follower.login} (Demo)
                 </a>
               </p>

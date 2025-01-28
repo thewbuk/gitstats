@@ -111,13 +111,15 @@ export function QuickStats() {
       public_repos: 12,
       followers: 45,
       following: 32,
-      public_gists: 8
+      public_gists: 8,
     };
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Repositories</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Repositories
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{mockData.public_repos}</div>
