@@ -29,14 +29,17 @@ export function CommitActivityStats() {
 
       if (githubAccount?.verification?.status === 'verified') {
         try {
-          const token = await getToken({ template: 'oauth_github' });
+          const tokenResponse = await fetch('/api/github/token');
+          if (!tokenResponse.ok) {
+            throw new Error('Failed to get GitHub token');
+          }
+          const { token } = await tokenResponse.json();
           if (!token) return;
 
           const response = await fetch('https://api.github.com/user/repos', {
             headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: 'application/vnd.github+json',
-              'X-GitHub-Api-Version': '2022-11-28',
+              Authorization: `token ${token}`,
+              Accept: 'application/vnd.github.v3+json',
             },
           });
 
@@ -50,9 +53,8 @@ export function CommitActivityStats() {
               `https://api.github.com/repos/${repo.full_name}/stats/participation`,
               {
                 headers: {
-                  Authorization: `Bearer ${token}`,
-                  Accept: 'application/vnd.github+json',
-                  'X-GitHub-Api-Version': '2022-11-28',
+                  Authorization: `token ${token}`,
+                  Accept: 'application/vnd.github.v3+json',
                 },
               }
             );
@@ -90,6 +92,16 @@ export function CommitActivityStats() {
 
     fetchCommitStats();
   }, [user, getToken]);
+
+  if (!user) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <p className="text-sm text-muted-foreground">Please sign in to view commit statistics.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

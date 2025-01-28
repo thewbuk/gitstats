@@ -32,16 +32,15 @@ export function RepoActivityChart() {
 
       if (githubAccount?.verification?.status === 'verified') {
         try {
-          const token = await getToken({ template: 'oauth_github' });
+          const token = await getToken();
           if (!token) return;
 
           const response = await fetch(
             'https://api.github.com/user/repos?sort=updated',
             {
               headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: 'application/vnd.github+json',
-                'X-GitHub-Api-Version': '2022-11-28',
+                Authorization: `token ${token}`,
+                Accept: 'application/vnd.github.v3+json',
               },
             }
           );
@@ -71,6 +70,16 @@ export function RepoActivityChart() {
 
     fetchRepoActivity();
   }, [user, getToken]);
+
+  if (!user) {
+    return (
+      <Card className="col-span-4">
+        <CardContent className="pt-6">
+          <p className="text-sm text-muted-foreground">Please sign in to view repository activity.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="col-span-4">

@@ -16,6 +16,7 @@
     "@2bad/ryanair": "^7.1.2",
     "@ai-sdk/openai": "^1.0.1",
     "@auth/core": "^0.37.4",
+    "@clerk/clerk-sdk-node": "^5.1.6",
     "@clerk/nextjs": "^6.10.3",
     "@consumet/extensions": "^1.8.1",
     "@hookform/resolvers": "^3.9.1",

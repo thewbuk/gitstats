@@ -12,6 +12,7 @@ export function QuickStats() {
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useUser();
   const { getToken } = useAuth();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchGithubData = async () => {
@@ -24,35 +25,37 @@ export function QuickStats() {
         (account) => account.provider === 'github'
       );
 
-      if (githubAccount?.verification?.status !== 'verified') {
-        setIsLoading(false);
-        return;
-      }
+      if (githubAccount?.verification?.status === 'verified') {
+        try {
+          const tokenResponse = await fetch('/api/github/token');
+          if (!tokenResponse.ok) {
+            const errorData = await tokenResponse.json();
+            throw new Error(errorData.error || 'Failed to get GitHub token');
+          }
+          const { token } = await tokenResponse.json();
+          if (!token) {
+            throw new Error('No token received');
+          }
 
-      try {
-        const token = await getToken({ template: 'oauth_github' });
-        if (!token) {
+          const response = await fetch('https://api.github.com/user', {
+            headers: {
+              Authorization: `token ${token}`,
+              Accept: 'application/vnd.github.v3+json',
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch GitHub user');
+          }
+
+          const data = await response.json();
+          setGithubUser(data);
+        } catch (error) {
+          console.error('Failed to fetch GitHub data:', error);
+          setError(error instanceof Error ? error.message : 'An error occurred');
           setIsLoading(false);
-          return;
         }
-
-        const response = await fetch('https://api.github.com/user', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/vnd.github+json',
-            'X-GitHub-Api-Version': '2022-11-28',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch GitHub user');
-        }
-
-        const data = await response.json();
-        setGithubUser(data);
-      } catch (error) {
-        console.error('Failed to fetch GitHub data:', error);
-      } finally {
+      } else {
         setIsLoading(false);
       }
     };
@@ -79,10 +82,16 @@ export function QuickStats() {
       <Alert>
         <AlertDescription className="flex items-center justify-between">
           <span>Connect your GitHub account to view statistics.</span>
-          <Button variant="outline" size="sm" onClick={() => user.createExternalAccount({
-            strategy: "oauth_github",
-            redirectUrl: "/",
-          })}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              user.createExternalAccount({
+                strategy: 'oauth_github',
+                redirectUrl: '/',
+              })
+            }
+          >
             <GitHubLogoIcon className="mr-2 h-4 w-4" />
             Connect GitHub
           </Button>
@@ -93,6 +102,14 @@ export function QuickStats() {
 
   if (isLoading) {
     return <div className="animate-pulse">Loading stats...</div>;
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
   }
 
   return (

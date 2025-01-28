@@ -16,8 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Cog, LayoutDashboard, LogOut } from 'lucide-react';
-import { DiscordLogoIcon } from '@radix-ui/react-icons';
+import { Cog, LogOut } from 'lucide-react';
 import SignUpButton from './SignUpButton';
 import { Icons } from '../common/icons';
 
@@ -53,23 +52,6 @@ export function SiteHeader() {
                 <span className="sr-only">GitHub</span>
               </div>
             </Link>
-            {/* <Link
-              href={siteConfig.links.twitter}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <div
-                className={cn(
-                  buttonVariants({
-                    variant: 'ghost',
-                  }),
-                  'w-9 px-0'
-                )}
-              >
-                <Icons.twitter className="h-5 w-5 fill-current" />
-                <span className="sr-only">Twitter</span>
-              </div>
-            </Link> */}
             <ThemeToggle />
             <SignedIn>
               <DropdownMenu>
@@ -100,21 +82,7 @@ export function SiteHeader() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild className="cursor-pointer">
                     <div>
-                      <DiscordLogoIcon className="mr-2 h-4 w-4" />
-                      <Link href="https://discord.gg/6Hjumj65">Discord</Link>
-                    </div>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <div>
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-
-                      <Link href="/">Dashboard</Link>
-                    </div>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <div>
                       <Cog className="mr-2 h-4 w-4" />
-
                       <Link href="/settings">Settings</Link>
                     </div>
                   </DropdownMenuItem>

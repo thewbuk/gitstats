@@ -8,11 +8,7 @@ const SignUpButton = () => {
 
   return (
     <SignedOut>
-      <Button
-        onClick={() => openSignUp()}
-      >
-        Sign up
-      </Button>
+      <Button onClick={() => openSignUp()}>Sign up</Button>
     </SignedOut>
   );
 };

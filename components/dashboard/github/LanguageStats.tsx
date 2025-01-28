@@ -39,14 +39,17 @@ export function LanguageStats() {
 
       if (githubAccount?.verification?.status === 'verified') {
         try {
-          const token = await getToken({ template: 'oauth_github' });
+          const tokenResponse = await fetch('/api/github/token');
+          if (!tokenResponse.ok) {
+            throw new Error('Failed to get GitHub token');
+          }
+          const { token } = await tokenResponse.json();
           if (!token) return;
 
           const response = await fetch('https://api.github.com/user/repos', {
             headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: 'application/vnd.github+json',
-              'X-GitHub-Api-Version': '2022-11-28',
+              Authorization: `token ${token}`,
+              Accept: 'application/vnd.github.v3+json',
             },
           });
 
@@ -60,9 +63,8 @@ export function LanguageStats() {
               `https://api.github.com/repos/${repo.full_name}/languages`,
               {
                 headers: {
-                  Authorization: `Bearer ${token}`,
-                  Accept: 'application/vnd.github+json',
-                  'X-GitHub-Api-Version': '2022-11-28',
+                  Authorization: `token ${token}`,
+                  Accept: 'application/vnd.github.v3+json',
                 },
               }
             );
@@ -103,6 +105,16 @@ export function LanguageStats() {
 
     fetchLanguages();
   }, [user, getToken]);
+
+  if (!user) {
+    return (
+      <Card className="col-span-4">
+        <CardContent className="pt-6">
+          <p className="text-sm text-muted-foreground">Please sign in to view language statistics.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="col-span-4">

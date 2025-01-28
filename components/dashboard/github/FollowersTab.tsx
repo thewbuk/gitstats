@@ -25,19 +25,19 @@ export function FollowersTab() {
 
       if (githubAccount?.verification?.status === 'verified') {
         try {
-          const token = await getToken({ template: 'oauth_github' });
+          const tokenResponse = await fetch('/api/github/token');
+          if (!tokenResponse.ok) {
+            throw new Error('Failed to get GitHub token');
+          }
+          const { token } = await tokenResponse.json();
           if (!token) return;
 
-          const response = await fetch(
-            'https://api.github.com/user/followers',
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: 'application/vnd.github+json',
-                'X-GitHub-Api-Version': '2022-11-28',
-              },
-            }
-          );
+          const response = await fetch('https://api.github.com/user/followers', {
+            headers: {
+              Authorization: `token ${token}`,
+              Accept: 'application/vnd.github.v3+json',
+            },
+          });
 
           if (!response.ok) {
             throw new Error('Failed to fetch followers');
@@ -53,6 +53,14 @@ export function FollowersTab() {
 
     fetchFollowers();
   }, [user, getToken]);
+
+  if (!user) {
+    return (
+      <div className="p-4">
+        <p className="text-sm text-muted-foreground">Please sign in to view your followers.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
