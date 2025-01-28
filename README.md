@@ -1,6 +1,6 @@
 # Cyclon
 
-A Next.js application with Clerk authentication.
+A Git stats application with Clerk authentication.
 
 ## Prerequisites
 
