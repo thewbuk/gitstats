@@ -5,7 +5,6 @@ import { WelcomeSection } from './WelcomeSection';
 import { QuickStats } from './QuickStats';
 import { RepoList } from './github/RepoList';
 import { RepoStats } from './github/RepoStats';
-import { GithubAuth } from './github/GithubAuth';
 import { FollowersTab } from './github/FollowersTab';
 import { LanguageStats } from './github/LanguageStats';
 import { CommitActivityStats } from './github/CommitActivityStats';
@@ -56,7 +55,6 @@ export const Dashboard = ({ userName }: DashboardProps) => {
             <div className="bg-card rounded-lg p-6 shadow-sm">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-semibold">GitHub Repositories</h2>
-                <GithubAuth />
               </div>
               <RepoList onRepositoriesChange={setRepositories} />
             </div>

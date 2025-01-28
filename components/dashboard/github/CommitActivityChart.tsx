@@ -1,144 +1,100 @@
 'use client';
 
-import { Bar, BarChart, XAxis } from 'recharts';
 import { useEffect, useState } from 'react';
-import { useGithubAuth } from '@/components/providers/github-auth-provider';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useUser, useAuth } from '@clerk/nextjs';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart';
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
-interface CommitData {
-  date: string;
-  additions: number;
-  deletions: number;
-}
-
-const chartConfig = {
-  additions: {
-    label: 'Additions',
-    color: 'hsl(var(--chart-1))',
-  },
-  deletions: {
-    label: 'Deletions',
-    color: 'hsl(var(--chart-2))',
-  },
-} satisfies ChartConfig;
-
-export const CommitActivityChart = () => {
-  const { isAuthenticated, token } = useGithubAuth();
-  const [commitData, setCommitData] = useState<CommitData[]>([]);
-  const [loading, setLoading] = useState(false);
+export function CommitActivityChart() {
+  const [commitData, setCommitData] = useState<any[]>([]);
+  const { user } = useUser();
+  const { getToken } = useAuth();
 
   useEffect(() => {
-    if (isAuthenticated && token) {
-      fetchCommitActivity();
-    }
-  }, [isAuthenticated, token]);
+    const fetchCommitActivity = async () => {
+      if (!user) return;
 
-  const fetchCommitActivity = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('https://api.github.com/user/repos', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/vnd.github+json',
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to fetch repositories');
-
-      const repos = await response.json();
-      const recentCommits = await Promise.all(
-        repos.slice(0, 5).map(async (repo: any) => {
-          const statsResponse = await fetch(
-            `https://api.github.com/repos/${repo.full_name}/stats/commit_activity`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: 'application/vnd.github+json',
-                'X-GitHub-Api-Version': '2022-11-28',
-              },
-            }
-          );
-          if (!statsResponse.ok) return null;
-          return statsResponse.json();
-        })
+      const githubAccount = user.externalAccounts?.find(
+        (account) => account.provider === 'github'
       );
 
-      const processedData = recentCommits
-        .flat()
-        .filter(Boolean)
-        .slice(0, 7)
-        .map((week: any) => ({
-          date: new Date(week.week * 1000).toISOString().split('T')[0],
-          additions: week.total * 10, // Approximation for visualization
-          deletions: week.total * 5, // Approximation for visualization
-        }));
+      if (githubAccount?.verification?.status === 'verified') {
+        try {
+          const token = await getToken({ template: 'oauth_github' });
+          if (!token) return;
 
-      setCommitData(processedData);
-    } catch (error) {
-      console.error('Failed to fetch commit activity:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+          const response = await fetch('https://api.github.com/user/repos', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: 'application/vnd.github+json',
+              'X-GitHub-Api-Version': '2022-11-28',
+            },
+          });
 
-  if (!isAuthenticated) {
-    return null;
-  }
+          if (!response.ok) {
+            throw new Error('Failed to fetch repositories');
+          }
+
+          const repos = await response.json();
+          const commitPromises = repos.slice(0, 5).map(async (repo: any) => {
+            const commitResponse = await fetch(
+              `https://api.github.com/repos/${repo.full_name}/stats/participation`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  Accept: 'application/vnd.github+json',
+                  'X-GitHub-Api-Version': '2022-11-28',
+                },
+              }
+            );
+            if (!commitResponse.ok) return null;
+            const commitStats = await commitResponse.json();
+            return {
+              name: repo.name,
+              commits: commitStats.owner.reduce(
+                (a: number, b: number) => a + b,
+                0
+              ),
+            };
+          });
+
+          const commitResults = await Promise.all(commitPromises);
+          setCommitData(
+            commitResults.filter(Boolean).sort((a, b) => b.commits - a.commits)
+          );
+        } catch (error) {
+          console.error('Failed to fetch commit activity:', error);
+        }
+      }
+    };
+
+    fetchCommitActivity();
+  }, [user, getToken]);
 
   return (
-    <Card>
+    <Card className="col-span-4">
       <CardHeader>
         <CardTitle>Commit Activity</CardTitle>
-        <CardDescription>
-          Weekly code changes across repositories
-        </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
-          <BarChart data={commitData}>
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              tickFormatter={(value) => {
-                return new Date(value).toLocaleDateString('en-US', {
-                  weekday: 'short',
-                });
-              }}
-            />
-            <Bar
-              dataKey="additions"
-              stackId="a"
-              fill="var(--color-additions)"
-              radius={[4, 4, 0, 0]}
-            />
-            <Bar
-              dataKey="deletions"
-              stackId="a"
-              fill="var(--color-deletions)"
-              radius={[0, 0, 4, 4]}
-            />
-            <ChartTooltip
-              content={<ChartTooltipContent indicator="line" />}
-              cursor={false}
-            />
-          </BarChart>
-        </ChartContainer>
+        <div className="h-[200px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={commitData}>
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="commits" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   );
-};
+}

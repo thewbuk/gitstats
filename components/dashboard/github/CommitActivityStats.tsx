@@ -1,185 +1,122 @@
 'use client';
 
-import * as React from 'react';
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart';
-import { useGithubAuth } from '@/components/providers/github-auth-provider';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useUser, useAuth } from '@clerk/nextjs';
 
-interface CommitActivity {
-  week: number;
+interface CommitStats {
   total: number;
-  days: number[];
+  weekly: number;
+  daily: number;
 }
 
-const chartConfig = {
-  commits: {
-    label: 'Commits',
-    color: 'hsl(var(--chart-1))',
-  },
-} satisfies ChartConfig;
-
 export function CommitActivityStats() {
-  const { isAuthenticated, token } = useGithubAuth();
-  const [loading, setLoading] = React.useState(false);
-  const [commitData, setCommitData] = React.useState<
-    { date: string; commits: number }[]
-  >([]);
+  const [stats, setStats] = useState<CommitStats>({
+    total: 0,
+    weekly: 0,
+    daily: 0,
+  });
+  const { user } = useUser();
+  const { getToken } = useAuth();
 
-  React.useEffect(() => {
-    if (isAuthenticated && token) {
-      fetchCommitActivity();
-    }
-  }, [isAuthenticated, token]);
+  useEffect(() => {
+    const fetchCommitStats = async () => {
+      if (!user) return;
 
-  const fetchCommitActivity = async () => {
-    setLoading(true);
-    try {
-      // First get user's repos
-      const reposResponse = await fetch(
-        'https://api.github.com/user/repos?per_page=100',
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/vnd.github+json',
-            'X-GitHub-Api-Version': '2022-11-28',
-          },
-        }
+      const githubAccount = user.externalAccounts?.find(
+        (account) => account.provider === 'github'
       );
-      const repos = await reposResponse.json();
 
-      // Get commit activity for each repo
-      const activityPromises = repos.slice(0, 5).map(async (repo: any) => {
-        const response = await fetch(
-          `https://api.github.com/repos/${repo.owner.login}/${repo.name}/stats/commit_activity`,
-          {
+      if (githubAccount?.verification?.status === 'verified') {
+        try {
+          const token = await getToken({ template: 'oauth_github' });
+          if (!token) return;
+
+          const response = await fetch('https://api.github.com/user/repos', {
             headers: {
               Authorization: `Bearer ${token}`,
               Accept: 'application/vnd.github+json',
               'X-GitHub-Api-Version': '2022-11-28',
             },
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch repositories');
           }
-        );
-        return response.json();
-      });
 
-      const activities = await Promise.all(activityPromises);
+          const repos = await response.json();
+          const commitPromises = repos.slice(0, 5).map(async (repo: any) => {
+            const commitResponse = await fetch(
+              `https://api.github.com/repos/${repo.full_name}/stats/participation`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  Accept: 'application/vnd.github+json',
+                  'X-GitHub-Api-Version': '2022-11-28',
+                },
+              }
+            );
+            if (!commitResponse.ok) return null;
+            const commitStats = await commitResponse.json();
+            return commitStats.owner;
+          });
 
-      // Process and combine the data
-      const processedData = activities
-        .flat()
-        .filter((activity: CommitActivity) => activity && activity.total)
-        .map((activity: CommitActivity) => ({
-          date: new Date(activity.week * 1000).toISOString().split('T')[0],
-          commits: activity.total,
-        }))
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-        .slice(-30); // Last 30 days
+          const commitResults = await Promise.all(commitPromises);
+          const validResults = commitResults.filter(Boolean);
 
-      setCommitData(processedData);
-    } catch (error) {
-      console.error('Failed to fetch commit activity:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+          if (validResults.length > 0) {
+            const total = validResults.reduce(
+              (acc, curr) =>
+                acc + curr.reduce((a: number, b: number) => a + b, 0),
+              0
+            );
+            const weekly = validResults.reduce(
+              (acc, curr) => acc + curr.slice(-1)[0],
+              0
+            );
+            const daily = Math.round(weekly / 7);
 
-  if (!isAuthenticated) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Commit Activity</CardTitle>
-          <CardDescription>Login to see your commit activity</CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
+            setStats({
+              total,
+              weekly,
+              daily,
+            });
+          }
+        } catch (error) {
+          console.error('Failed to fetch commit stats:', error);
+        }
+      }
+    };
+
+    fetchCommitStats();
+  }, [user, getToken]);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Commit Activity</CardTitle>
-        <CardDescription>
-          Your commit activity over the last 30 days
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        {loading ? (
-          <Skeleton className="h-[250px] w-full" />
-        ) : (
-          <ChartContainer
-            config={chartConfig}
-            className="aspect-auto h-[250px] w-full"
-          >
-            <AreaChart data={commitData}>
-              <defs>
-                <linearGradient id="fillCommits" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="var(--color-commits)"
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="var(--color-commits)"
-                    stopOpacity={0.1}
-                  />
-                </linearGradient>
-              </defs>
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                minTickGap={32}
-                tickFormatter={(value) => {
-                  const date = new Date(value);
-                  return date.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                  });
-                }}
-              />
-              <ChartTooltip
-                cursor={false}
-                content={
-                  <ChartTooltipContent
-                    labelFormatter={(value) => {
-                      return new Date(value).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                      });
-                    }}
-                    indicator="dot"
-                  />
-                }
-              />
-              <Area
-                dataKey="commits"
-                type="monotone"
-                fill="url(#fillCommits)"
-                stroke="var(--color-commits)"
-              />
-              <ChartLegend content={<ChartLegendContent />} />
-            </AreaChart>
-          </ChartContainer>
-        )}
-      </CardContent>
-    </Card>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total Commits</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.total}</div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Weekly Commits</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.weekly}</div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Daily Average</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.daily}</div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

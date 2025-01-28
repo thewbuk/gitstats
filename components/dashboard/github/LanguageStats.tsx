@@ -1,178 +1,138 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Bar, BarChart, XAxis, YAxis } from 'recharts';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart';
-import { useGithubAuth } from '@/components/providers/github-auth-provider';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useUser, useAuth } from '@clerk/nextjs';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 interface LanguageData {
-  language: string;
-  bytes: number;
-  fill: string;
+  name: string;
+  value: number;
+  color: string;
 }
 
-const colors = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
+const COLORS = [
+  '#0088FE',
+  '#00C49F',
+  '#FFBB28',
+  '#FF8042',
+  '#8884d8',
+  '#82ca9d',
+  '#ffc658',
+  '#ff7300',
+  '#ff0000',
+  '#00ff00',
 ];
 
-const chartConfig = {
-  bytes: {
-    label: 'Bytes',
-  },
-} satisfies ChartConfig;
-
 export function LanguageStats() {
-  const { isAuthenticated, token } = useGithubAuth();
-  const [loading, setLoading] = useState(false);
-  const [languageData, setLanguageData] = useState<LanguageData[]>([]);
+  const [languages, setLanguages] = useState<LanguageData[]>([]);
+  const { user } = useUser();
+  const { getToken } = useAuth();
 
   useEffect(() => {
-    if (isAuthenticated && token) {
-      fetchLanguageStats();
-    }
-  }, [isAuthenticated, token]);
+    const fetchLanguages = async () => {
+      if (!user) return;
 
-  const fetchLanguageStats = async () => {
-    setLoading(true);
-    try {
-      // First get user's repos
-      const reposResponse = await fetch(
-        'https://api.github.com/user/repos?per_page=100',
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/vnd.github+json',
-            'X-GitHub-Api-Version': '2022-11-28',
-          },
-        }
+      const githubAccount = user.externalAccounts?.find(
+        (account) => account.provider === 'github'
       );
-      const repos = await reposResponse.json();
 
-      // Get languages for each repo
-      const languagePromises = repos.map(async (repo: any) => {
-        const response = await fetch(
-          `https://api.github.com/repos/${repo.owner.login}/${repo.name}/languages`,
-          {
+      if (githubAccount?.verification?.status === 'verified') {
+        try {
+          const token = await getToken({ template: 'oauth_github' });
+          if (!token) return;
+
+          const response = await fetch('https://api.github.com/user/repos', {
             headers: {
               Authorization: `Bearer ${token}`,
               Accept: 'application/vnd.github+json',
               'X-GitHub-Api-Version': '2022-11-28',
             },
-          }
-        );
-        return response.json();
-      });
-
-      const languages = await Promise.all(languagePromises);
-
-      // Combine and process language data
-      const languageTotals = languages.reduce(
-        (acc: Record<string, number>, curr) => {
-          Object.entries(curr).forEach(([lang, bytes]) => {
-            acc[lang] = (acc[lang] || 0) + (bytes as number);
           });
-          return acc;
-        },
-        {}
-      );
 
-      // Convert to array and sort by bytes
-      const sortedData = Object.entries(languageTotals)
-        .map(([language, bytes], index) => ({
-          language,
-          bytes,
-          fill: colors[index % colors.length],
-        }))
-        .sort((a, b) => b.bytes - a.bytes)
-        .slice(0, 5); // Top 5 languages
+          if (!response.ok) {
+            throw new Error('Failed to fetch repositories');
+          }
 
-      setLanguageData(sortedData);
-    } catch (error) {
-      console.error('Failed to fetch language stats:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+          const repos = await response.json();
+          const languagePromises = repos.map(async (repo: any) => {
+            const langResponse = await fetch(
+              `https://api.github.com/repos/${repo.full_name}/languages`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  Accept: 'application/vnd.github+json',
+                  'X-GitHub-Api-Version': '2022-11-28',
+                },
+              }
+            );
+            if (!langResponse.ok) return null;
+            return langResponse.json();
+          });
 
-  if (!isAuthenticated) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Language Distribution</CardTitle>
-          <CardDescription>Login to see your language stats</CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
+          const languageResults = await Promise.all(languagePromises);
+          const validResults = languageResults.filter(Boolean);
+
+          // Aggregate language data
+          const languageTotals = validResults.reduce(
+            (acc: Record<string, number>, curr) => {
+              Object.entries(curr).forEach(([lang, bytes]) => {
+                acc[lang] = (acc[lang] || 0) + (bytes as number);
+              });
+              return acc;
+            },
+            {}
+          );
+
+          // Convert to chart data format and sort by value
+          const chartData = Object.entries(languageTotals)
+            .map(([name, value], index) => ({
+              name,
+              value,
+              color: COLORS[index % COLORS.length],
+            }))
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 10); // Top 10 languages
+
+          setLanguages(chartData);
+        } catch (error) {
+          console.error('Failed to fetch language stats:', error);
+        }
+      }
+    };
+
+    fetchLanguages();
+  }, [user, getToken]);
 
   return (
-    <Card>
+    <Card className="col-span-4">
       <CardHeader>
         <CardTitle>Language Distribution</CardTitle>
-        <CardDescription>
-          Top 5 most used languages across your repositories
-        </CardDescription>
       </CardHeader>
       <CardContent>
-        {loading ? (
-          <Skeleton className="h-[250px] w-full" />
-        ) : (
-          <ChartContainer config={chartConfig}>
-            <BarChart
-              data={languageData}
-              layout="vertical"
-              margin={{ left: 80 }}
-              className="h-[250px] w-full"
-            >
-              <YAxis
-                dataKey="language"
-                type="category"
-                tickLine={false}
-                axisLine={false}
-                width={80}
-              />
-              <XAxis
-                type="number"
-                tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
-                tickLine={false}
-                axisLine={false}
-              />
-              <ChartTooltip
-                cursor={false}
-                content={(props) => (
-                  <ChartTooltipContent className="bg-background">
-                    {props.payload?.[0]?.value
-                      ? `${(Number(props.payload[0].value) / 1000).toFixed(1)}K bytes`
-                      : ''}
-                  </ChartTooltipContent>
-                )}
-              />
-              <Bar
-                dataKey="bytes"
-                radius={[4, 4, 4, 4]}
-                fill="hsl(var(--background))"
-                background={{ fill: 'fill' }}
-              />
-            </BarChart>
-          </ChartContainer>
-        )}
+        <div className="h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={languages}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) =>
+                  `${name} ${(percent * 100).toFixed(0)}%`
+                }
+                outerRadius={100}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {languages.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   );
