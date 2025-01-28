@@ -1,6 +1,5 @@
 'use client';
 import Link from 'next/link';
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { MainNav } from '@/components/navbar/MainNav';
 import { MobileNav } from '@/components/navbar/MobileNav';
@@ -20,7 +19,6 @@ import { Cog, LogOut } from 'lucide-react';
 import SignUpButton from './SignUpButton';
 import { Icons } from '../common/icons';
 
-
 export function SiteHeader() {
   const { user } = useUser();
   const { signOut } = useClerk();
@@ -32,8 +30,7 @@ export function SiteHeader() {
         <MobileNav />
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-2">
-            {/* <CommandSearch /> */}
-            <Link href={''} target="_blank" rel="noreferrer">
+            <Link href={'https://github.com/thewbuk/gitstats'} target="_blank" rel="noreferrer">
               <div
                 className={cn(
                   buttonVariants({

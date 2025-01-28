@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 import { NavigationMenuLink } from '@/components/ui/navigation-menu';
 import * as React from 'react';
 
-
 export function MainNav() {
   return (
     <div className="mr-4 hidden xl:flex">
