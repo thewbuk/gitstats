@@ -1,5 +1,3 @@
-const GITHUB_API_URL = 'https://api.github.com';
-
 export async function searchRepositories(
   query: string,
   sort: string = 'stars',
