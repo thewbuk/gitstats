@@ -10,7 +10,6 @@ const SignUpButton = () => {
     <SignedOut>
       <Button
         onClick={() => openSignUp()}
-        disabled={process.env.VERCEL_ENV == 'production'}
       >
         Sign up
       </Button>
