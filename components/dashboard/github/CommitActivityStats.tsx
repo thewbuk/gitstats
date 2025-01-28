@@ -15,7 +15,9 @@ type CommitActivityStatsProps = {
   token?: string;
 };
 
-export const CommitActivityStats = ({ token: externalToken }: CommitActivityStatsProps) => {
+export const CommitActivityStats = ({
+  token: externalToken,
+}: CommitActivityStatsProps) => {
   const [stats, setStats] = useState<CommitStats>({
     total: 0,
     today: 0,
@@ -51,7 +53,7 @@ export const CommitActivityStats = ({ token: externalToken }: CommitActivityStat
           headers: {
             Authorization: `Bearer ${authToken}`,
             Accept: 'application/vnd.github.v3+json',
-            'X-GitHub-Api-Version': '2022-11-28'
+            'X-GitHub-Api-Version': '2022-11-28',
           },
         });
 
@@ -67,7 +69,7 @@ export const CommitActivityStats = ({ token: externalToken }: CommitActivityStat
               headers: {
                 Authorization: `Bearer ${authToken}`,
                 Accept: 'application/vnd.github.v3+json',
-                'X-GitHub-Api-Version': '2022-11-28'
+                'X-GitHub-Api-Version': '2022-11-28',
               },
             }
           );
@@ -80,15 +82,25 @@ export const CommitActivityStats = ({ token: externalToken }: CommitActivityStat
 
         // Calculate stats
         const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const today = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate()
+        );
         const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
         const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
 
         const commitStats = {
           total: allCommits.length,
-          today: allCommits.filter(commit => new Date(commit.commit.author.date) >= today).length,
-          week: allCommits.filter(commit => new Date(commit.commit.author.date) >= weekAgo).length,
-          month: allCommits.filter(commit => new Date(commit.commit.author.date) >= monthAgo).length,
+          today: allCommits.filter(
+            (commit) => new Date(commit.commit.author.date) >= today
+          ).length,
+          week: allCommits.filter(
+            (commit) => new Date(commit.commit.author.date) >= weekAgo
+          ).length,
+          month: allCommits.filter(
+            (commit) => new Date(commit.commit.author.date) >= monthAgo
+          ).length,
         };
 
         setStats(commitStats);
@@ -190,4 +202,4 @@ export const CommitActivityStats = ({ token: externalToken }: CommitActivityStat
       </Card>
     </div>
   );
-}
+};

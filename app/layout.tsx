@@ -37,9 +37,7 @@ export default function RootLayout({
             shadow="0 0 10px #2299DD,0 0 5px #2299DD"
           />
           <div className="relative flex min-h-screen flex-col">
-            <div className="flex-1">
-              {children}
-            </div>
+            <div className="flex-1">{children}</div>
             <Footer />
             <TailwindIndicator />
           </div>

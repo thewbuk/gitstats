@@ -124,4 +124,4 @@ export const RepoActivityChart = ({ token }: RepoActivityChartProps) => {
       </CardContent>
     </Card>
   );
-}
+};

@@ -1,9 +1,9 @@
 import { ClerkProvider } from '@clerk/nextjs';
 
 export default function ClerkLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-    return <ClerkProvider>{children}</ClerkProvider>;
-} 
+  return <ClerkProvider>{children}</ClerkProvider>;
+}

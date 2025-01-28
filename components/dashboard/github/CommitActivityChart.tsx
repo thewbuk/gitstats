@@ -135,4 +135,4 @@ export const CommitActivityChart = ({ token }: CommitActivityChartProps) => {
       </CardContent>
     </Card>
   );
-}
+};

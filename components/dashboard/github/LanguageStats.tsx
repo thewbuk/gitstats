@@ -59,7 +59,7 @@ export const LanguageStats = ({ token: externalToken }: LanguageStatsProps) => {
           headers: {
             Authorization: `Bearer ${authToken}`,
             Accept: 'application/vnd.github.v3+json',
-            'X-GitHub-Api-Version': '2022-11-28'
+            'X-GitHub-Api-Version': '2022-11-28',
           },
         });
 
@@ -73,7 +73,7 @@ export const LanguageStats = ({ token: externalToken }: LanguageStatsProps) => {
             headers: {
               Authorization: `Bearer ${authToken}`,
               Accept: 'application/vnd.github.v3+json',
-              'X-GitHub-Api-Version': '2022-11-28'
+              'X-GitHub-Api-Version': '2022-11-28',
             },
           });
           return await langResponse.json();
@@ -165,4 +165,4 @@ export const LanguageStats = ({ token: externalToken }: LanguageStatsProps) => {
       </CardContent>
     </Card>
   );
-}
+};

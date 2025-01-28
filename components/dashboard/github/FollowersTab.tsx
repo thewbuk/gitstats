@@ -133,4 +133,4 @@ export const FollowersTab = ({ token }: FollowersTabProps) => {
       )}
     </div>
   );
-}
+};
