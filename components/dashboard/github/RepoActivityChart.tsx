@@ -72,12 +72,30 @@ export function RepoActivityChart() {
   }, [user, getToken]);
 
   if (!user) {
+    const mockActivity = [
+      { name: 'awesome-project', activity: 120 },
+      { name: 'cool-app', activity: 85 },
+      { name: 'utils', activity: 65 },
+      { name: 'website', activity: 45 },
+      { name: 'docs', activity: 30 },
+    ];
+
     return (
       <Card className="col-span-4">
-        <CardContent className="pt-6">
-          <p className="text-sm text-muted-foreground">
-            Please sign in to view repository activity.
-          </p>
+        <CardHeader>
+          <CardTitle>Repository Activity (Demo)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={mockActivity}>
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="activity" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </CardContent>
       </Card>
     );

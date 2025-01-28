@@ -58,11 +58,29 @@ export function FollowersTab() {
   }, [user, getToken]);
 
   if (!user) {
+    const mockFollowers = [
+      { login: 'user1', avatar_url: 'https://avatars.githubusercontent.com/u/1?v=4', html_url: 'https://github.com/user1' },
+      { login: 'user2', avatar_url: 'https://avatars.githubusercontent.com/u/2?v=4', html_url: 'https://github.com/user2' },
+      { login: 'user3', avatar_url: 'https://avatars.githubusercontent.com/u/3?v=4', html_url: 'https://github.com/user3' },
+    ];
+
     return (
-      <div className="p-4">
-        <p className="text-sm text-muted-foreground">
-          Please sign in to view your followers.
-        </p>
+      <div className="space-y-8">
+        {mockFollowers.map((follower) => (
+          <div key={follower.login} className="flex items-center">
+            <Avatar className="h-9 w-9">
+              <AvatarImage src={follower.avatar_url} alt={follower.login} />
+              <AvatarFallback>{follower.login[0]}</AvatarFallback>
+            </Avatar>
+            <div className="ml-4 space-y-1">
+              <p className="text-sm font-medium leading-none">
+                <a href={follower.html_url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                  {follower.login} (Demo)
+                </a>
+              </p>
+            </div>
+          </div>
+        ))}
       </div>
     );
   }

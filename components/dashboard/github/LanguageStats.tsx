@@ -107,12 +107,43 @@ export function LanguageStats() {
   }, [user, getToken]);
 
   if (!user) {
+    const mockLanguages = [
+      { name: 'JavaScript', value: 45000, color: '#f1e05a' },
+      { name: 'TypeScript', value: 35000, color: '#2b7489' },
+      { name: 'Python', value: 25000, color: '#3572A5' },
+      { name: 'Rust', value: 15000, color: '#dea584' },
+      { name: 'Go', value: 10000, color: '#00ADD8' },
+    ];
+
     return (
       <Card className="col-span-4">
-        <CardContent className="pt-6">
-          <p className="text-sm text-muted-foreground">
-            Please sign in to view language statistics.
-          </p>
+        <CardHeader>
+          <CardTitle>Language Distribution (Demo)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={mockLanguages}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) =>
+                    `${name} ${(percent * 100).toFixed(0)}%`
+                  }
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {mockLanguages.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         </CardContent>
       </Card>
     );

@@ -83,12 +83,30 @@ export function CommitActivityChart() {
   }, [user, getToken]);
 
   if (!user) {
+    const mockData = [
+      { name: 'project-a', commits: 45 },
+      { name: 'project-b', commits: 32 },
+      { name: 'project-c', commits: 28 },
+      { name: 'project-d', commits: 15 },
+      { name: 'project-e', commits: 8 },
+    ];
+
     return (
       <Card className="col-span-4">
-        <CardContent className="pt-6">
-          <p className="text-sm text-muted-foreground">
-            Please sign in to view commit activity.
-          </p>
+        <CardHeader>
+          <CardTitle>Commit Activity (Demo)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[200px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={mockData}>
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="commits" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </CardContent>
       </Card>
     );
