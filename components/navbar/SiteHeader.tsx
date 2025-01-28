@@ -30,7 +30,11 @@ export function SiteHeader() {
         <MobileNav />
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-2">
-            <Link href={'https://github.com/thewbuk/gitstats'} target="_blank" rel="noreferrer">
+            <Link
+              href={'https://github.com/thewbuk/gitstats'}
+              target="_blank"
+              rel="noreferrer"
+            >
               <div
                 className={cn(
                   buttonVariants({
