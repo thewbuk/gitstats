@@ -12,7 +12,7 @@ A Git stats application with Clerk authentication.
 1. Clone the repository:
 
 ```bash
-git clone <https://github.com/thewbuk/gitstats>
+git clone https://github.com/thewbuk/gitstats
 cd gitstats
 ```
 
