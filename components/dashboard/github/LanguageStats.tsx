@@ -24,87 +24,71 @@ const COLORS = [
   '#00ff00',
 ];
 
-export function LanguageStats() {
+type LanguageStatsProps = {
+  token?: string;
+};
+
+export const LanguageStats = ({ token: externalToken }: LanguageStatsProps) => {
   const [languages, setLanguages] = useState<LanguageData[]>([]);
   const { user } = useUser();
   const { getToken } = useAuth();
 
   useEffect(() => {
     const fetchLanguages = async () => {
-      if (!user) return;
+      try {
+        let authToken = externalToken;
 
-      const githubAccount = user.externalAccounts?.find(
-        (account) => account.provider === 'github'
-      );
-
-      if (githubAccount?.verification?.status === 'verified') {
-        try {
-          const tokenResponse = await fetch('/api/github/token');
-          if (!tokenResponse.ok) {
-            throw new Error('Failed to get GitHub token');
-          }
-          const { token } = await tokenResponse.json();
-          if (!token) return;
-
-          const response = await fetch('https://api.github.com/user/repos', {
-            headers: {
-              Authorization: `token ${token}`,
-              Accept: 'application/vnd.github.v3+json',
-            },
-          });
-
-          if (!response.ok) {
-            throw new Error('Failed to fetch repositories');
-          }
-
-          const repos = await response.json();
-          const languagePromises = repos.map(async (repo: any) => {
-            const langResponse = await fetch(
-              `https://api.github.com/repos/${repo.full_name}/languages`,
-              {
-                headers: {
-                  Authorization: `token ${token}`,
-                  Accept: 'application/vnd.github.v3+json',
-                },
-              }
-            );
-            if (!langResponse.ok) return null;
-            return langResponse.json();
-          });
-
-          const languageResults = await Promise.all(languagePromises);
-          const validResults = languageResults.filter(Boolean);
-
-          // Aggregate language data
-          const languageTotals = validResults.reduce(
-            (acc: Record<string, number>, curr) => {
-              Object.entries(curr).forEach(([lang, bytes]) => {
-                acc[lang] = (acc[lang] || 0) + (bytes as number);
-              });
-              return acc;
-            },
-            {}
+        if (!authToken && user) {
+          const githubAccount = user.externalAccounts?.find(
+            (account) => account.provider === 'github'
           );
 
-          // Convert to chart data format and sort by value
-          const chartData = Object.entries(languageTotals)
-            .map(([name, value], index) => ({
-              name,
-              value,
-              color: COLORS[index % COLORS.length],
-            }))
-            .sort((a, b) => b.value - a.value)
-            .slice(0, 10); // Top 10 languages
-
-          setLanguages(chartData);
-        } catch (error) {
-          console.error('Failed to fetch language stats:', error);
+          if (githubAccount?.verification?.status === 'verified') {
+            const tokenResponse = await fetch('/api/github/token');
+            if (!tokenResponse.ok) {
+              throw new Error('Failed to get GitHub token');
+            }
+            const { token } = await tokenResponse.json();
+            authToken = token;
+          }
         }
+
+        if (!authToken) return;
+
+        const response = await fetch('https://api.github.com/user/repos', {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            Accept: 'application/vnd.github.v3+json',
+            'X-GitHub-Api-Version': '2022-11-28'
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch repositories');
+        }
+
+        const repos = await response.json();
+        const languagePromises = repos.map(async (repo: any) => {
+          const langResponse = await fetch(repo.languages_url, {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              Accept: 'application/vnd.github.v3+json',
+              'X-GitHub-Api-Version': '2022-11-28'
+            },
+          });
+          return await langResponse.json();
+        });
+
+        const languagesData = await Promise.all(languagePromises);
+        const languageStats = calculateLanguageStats(languagesData);
+        setLanguages(languageStats);
+      } catch (error) {
+        console.error('Failed to fetch languages:', error);
       }
     };
 
     fetchLanguages();
-  }, [user, getToken]);
+  }, [user, getToken, externalToken]);
 
   if (!user) {
     const mockLanguages = [

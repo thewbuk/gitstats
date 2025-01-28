@@ -10,10 +10,11 @@ import { Repository } from '../Dashboard';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 type RepoListProps = {
-  onRepositoriesChange?: (repos: Repository[]) => void;
+  onRepositoriesChange: (repos: Repository[]) => void;
+  token?: string;
 };
 
-export const RepoList = ({ onRepositoriesChange }: RepoListProps) => {
+export const RepoList = ({ onRepositoriesChange, token }: RepoListProps) => {
   const [repos, setRepos] = useState<Repository[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [sort, setSort] = useState('stars');

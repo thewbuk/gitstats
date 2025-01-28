@@ -6,9 +6,10 @@ import { Repository } from '../Dashboard';
 
 type RepoStatsProps = {
   repositories: Repository[];
+  token?: string;
 };
 
-export const RepoStats = ({ repositories }: RepoStatsProps) => {
+export const RepoStats = ({ repositories, token }: RepoStatsProps) => {
   const calculateLanguageStats = () => {
     const stats: { [key: string]: number } = {};
     let totalRepos = 0;

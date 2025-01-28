@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { WelcomeSection } from './WelcomeSection';
-import { QuickStats } from './QuickStats';
+import { TokenQuickStats, ClerkQuickStats } from './github/QuickStats';
 import { RepoList } from './github/RepoList';
 import { RepoStats } from './github/RepoStats';
 import { FollowersTab } from './github/FollowersTab';
@@ -29,9 +29,10 @@ export type Repository = {
 
 type DashboardProps = {
   userName?: string | null;
+  token?: string;
 };
 
-export const Dashboard = ({ userName }: DashboardProps) => {
+export const Dashboard = ({ userName, token }: DashboardProps) => {
   const [repositories, setRepositories] = React.useState<Repository[]>([]);
 
   return (
@@ -44,7 +45,7 @@ export const Dashboard = ({ userName }: DashboardProps) => {
 
         {/* Quick Stats Section */}
         <div className="mb-8">
-          <QuickStats />
+          {token ? <TokenQuickStats token={token} /> : <ClerkQuickStats />}
         </div>
 
         {/* Main Grid Layout */}
@@ -56,13 +57,13 @@ export const Dashboard = ({ userName }: DashboardProps) => {
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-semibold">GitHub Repositories</h2>
               </div>
-              <RepoList onRepositoriesChange={setRepositories} />
+              <RepoList onRepositoriesChange={setRepositories} token={token} />
             </div>
 
             {/* Activity Charts */}
             <div className="grid grid-cols-1 gap-6">
-              <CommitActivityChart />
-              <RepoActivityChart />
+              <CommitActivityChart token={token} />
+              <RepoActivityChart token={token} />
             </div>
           </div>
 
@@ -70,24 +71,24 @@ export const Dashboard = ({ userName }: DashboardProps) => {
           <div className="lg:col-span-4 space-y-6">
             {/* GitHub Stats Card */}
             <div className="bg-card rounded-lg p-6 shadow-sm">
-              <RepoStats repositories={repositories} />
+              <RepoStats repositories={repositories} token={token} />
             </div>
 
             {/* Friends Card */}
             <div className="bg-card rounded-lg p-6 shadow-sm">
               <h2 className="text-xl font-semibold mb-4">Friends</h2>
-              <FollowersTab />
+              <FollowersTab token={token} />
             </div>
 
             {/* Stats Cards */}
             <div className="space-y-6">
               <div className="bg-card rounded-lg p-6 shadow-sm">
                 <h2 className="text-xl font-semibold mb-4">User Statistics</h2>
-                <CommitActivityStats />
+                <CommitActivityStats token={token} />
               </div>
               <div className="bg-card rounded-lg p-6 shadow-sm">
                 <h2 className="text-xl font-semibold mb-4">Categories</h2>
-                <LanguageStats />
+                <LanguageStats token={token} />
               </div>
             </div>
           </div>

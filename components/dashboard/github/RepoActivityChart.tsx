@@ -17,7 +17,11 @@ interface RepoActivity {
   activity: number;
 }
 
-export function RepoActivityChart() {
+type RepoActivityChartProps = {
+  token?: string;
+};
+
+export const RepoActivityChart = ({ token }: RepoActivityChartProps) => {
   const [repoActivity, setRepoActivity] = useState<RepoActivity[]>([]);
   const { user } = useUser();
   const { getToken } = useAuth();

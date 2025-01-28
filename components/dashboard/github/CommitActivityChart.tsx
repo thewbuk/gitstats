@@ -12,7 +12,11 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-export function CommitActivityChart() {
+type CommitActivityChartProps = {
+  token?: string;
+};
+
+export const CommitActivityChart = ({ token }: CommitActivityChartProps) => {
   const [commitData, setCommitData] = useState<any[]>([]);
   const { user } = useUser();
   const { getToken } = useAuth();

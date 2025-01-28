@@ -6,98 +6,106 @@ import { useUser, useAuth } from '@clerk/nextjs';
 
 interface CommitStats {
   total: number;
-  weekly: number;
-  daily: number;
+  today: number;
+  week: number;
+  month: number;
 }
 
-export function CommitActivityStats() {
+type CommitActivityStatsProps = {
+  token?: string;
+};
+
+export const CommitActivityStats = ({ token: externalToken }: CommitActivityStatsProps) => {
   const [stats, setStats] = useState<CommitStats>({
     total: 0,
-    weekly: 0,
-    daily: 0,
+    today: 0,
+    week: 0,
+    month: 0,
   });
   const { user } = useUser();
   const { getToken } = useAuth();
 
   useEffect(() => {
     const fetchCommitStats = async () => {
-      if (!user) return;
+      try {
+        let authToken = externalToken;
 
-      const githubAccount = user.externalAccounts?.find(
-        (account) => account.provider === 'github'
-      );
+        if (!authToken && user) {
+          const githubAccount = user.externalAccounts?.find(
+            (account) => account.provider === 'github'
+          );
 
-      if (githubAccount?.verification?.status === 'verified') {
-        try {
-          const tokenResponse = await fetch('/api/github/token');
-          if (!tokenResponse.ok) {
-            throw new Error('Failed to get GitHub token');
+          if (githubAccount?.verification?.status === 'verified') {
+            const tokenResponse = await fetch('/api/github/token');
+            if (!tokenResponse.ok) {
+              throw new Error('Failed to get GitHub token');
+            }
+            const { token } = await tokenResponse.json();
+            authToken = token;
           }
-          const { token } = await tokenResponse.json();
-          if (!token) return;
-
-          const response = await fetch('https://api.github.com/user/repos', {
-            headers: {
-              Authorization: `token ${token}`,
-              Accept: 'application/vnd.github.v3+json',
-            },
-          });
-
-          if (!response.ok) {
-            throw new Error('Failed to fetch repositories');
-          }
-
-          const repos = await response.json();
-          const commitPromises = repos.slice(0, 5).map(async (repo: any) => {
-            const commitResponse = await fetch(
-              `https://api.github.com/repos/${repo.full_name}/stats/participation`,
-              {
-                headers: {
-                  Authorization: `token ${token}`,
-                  Accept: 'application/vnd.github.v3+json',
-                },
-              }
-            );
-            if (!commitResponse.ok) return null;
-            const commitStats = await commitResponse.json();
-            return commitStats.owner;
-          });
-
-          const commitResults = await Promise.all(commitPromises);
-          const validResults = commitResults.filter(Boolean);
-
-          if (validResults.length > 0) {
-            const total = validResults.reduce(
-              (acc, curr) =>
-                acc + curr.reduce((a: number, b: number) => a + b, 0),
-              0
-            );
-            const weekly = validResults.reduce(
-              (acc, curr) => acc + curr.slice(-1)[0],
-              0
-            );
-            const daily = Math.round(weekly / 7);
-
-            setStats({
-              total,
-              weekly,
-              daily,
-            });
-          }
-        } catch (error) {
-          console.error('Failed to fetch commit stats:', error);
         }
+
+        if (!authToken) return;
+
+        const response = await fetch('https://api.github.com/user/repos', {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            Accept: 'application/vnd.github.v3+json',
+            'X-GitHub-Api-Version': '2022-11-28'
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch repositories');
+        }
+
+        const repos = await response.json();
+        const commitPromises = repos.map(async (repo: any) => {
+          const commitResponse = await fetch(
+            `https://api.github.com/repos/${repo.full_name}/commits?author=${user?.username}&per_page=100`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                Accept: 'application/vnd.github.v3+json',
+                'X-GitHub-Api-Version': '2022-11-28'
+              },
+            }
+          );
+          if (!commitResponse.ok) return [];
+          return await commitResponse.json();
+        });
+
+        const commitResults = await Promise.all(commitPromises);
+        const allCommits = commitResults.flat();
+
+        // Calculate stats
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+        const commitStats = {
+          total: allCommits.length,
+          today: allCommits.filter(commit => new Date(commit.commit.author.date) >= today).length,
+          week: allCommits.filter(commit => new Date(commit.commit.author.date) >= weekAgo).length,
+          month: allCommits.filter(commit => new Date(commit.commit.author.date) >= monthAgo).length,
+        };
+
+        setStats(commitStats);
+      } catch (error) {
+        console.error('Failed to fetch commit stats:', error);
       }
     };
 
     fetchCommitStats();
-  }, [user, getToken]);
+  }, [user, getToken, externalToken]);
 
   if (!user) {
     const mockStats = {
       total: 234,
-      weekly: 15,
-      daily: 2,
+      today: 15,
+      week: 2,
+      month: 0,
     };
 
     return (
@@ -115,21 +123,31 @@ export function CommitActivityStats() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Weekly Commits (Demo)
+              Today's Commits (Demo)
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockStats.weekly}</div>
+            <div className="text-2xl font-bold">{mockStats.today}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Daily Average (Demo)
+              Weekly Commits (Demo)
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockStats.daily}</div>
+            <div className="text-2xl font-bold">{mockStats.week}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Monthly Commits (Demo)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{mockStats.month}</div>
           </CardContent>
         </Card>
       </div>
@@ -148,18 +166,26 @@ export function CommitActivityStats() {
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Weekly Commits</CardTitle>
+          <CardTitle className="text-sm font-medium">Today's Commits</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.weekly}</div>
+          <div className="text-2xl font-bold">{stats.today}</div>
         </CardContent>
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Daily Average</CardTitle>
+          <CardTitle className="text-sm font-medium">Weekly Commits</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.daily}</div>
+          <div className="text-2xl font-bold">{stats.week}</div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Monthly Commits</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.month}</div>
         </CardContent>
       </Card>
     </div>

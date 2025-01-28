@@ -10,7 +10,11 @@ interface GithubFollower {
   html_url: string;
 }
 
-export function FollowersTab() {
+type FollowersTabProps = {
+  token?: string;
+};
+
+export const FollowersTab = ({ token }: FollowersTabProps) => {
   const [followers, setFollowers] = useState<GithubFollower[]>([]);
   const { user } = useUser();
   const { getToken } = useAuth();

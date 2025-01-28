@@ -45,6 +45,33 @@ The application will be available at `http://localhost:3000`.
 - Sign In: `/signin`
 - SSO Callback: `/signup#/sso-callback`
 
+## Authentication Options
+
+GitStats offers two authentication methods:
+
+### 1. Clerk Authentication (Recommended)
+
+- Navigate to `/` to use Clerk authentication
+- Sign up/Sign in with your email or social providers
+- Provides full user management and security features
+
+### 2. GitHub Token Authentication
+
+- Navigate to `/github-auth` to use GitHub token authentication
+- You'll need to create a Personal Access Token (PAT) from GitHub
+- Required token scopes:
+  - `repo` - For repository access
+  - `read:user` - For user profile information
+  - `read:org` - For organization data
+
+To create a GitHub PAT:
+
+1. Go to [GitHub Settings > Developer Settings > Personal Access Tokens](https://github.com/settings/tokens/new)
+2. Generate a new token with the required scopes
+3. Copy the token and paste it in the GitStats token input field
+
+Note: The GitHub token is stored securely in your browser's localStorage. Clear your browser data to remove it.
+
 ## Available Scripts
 
 - `pnpm dev` - Start development server
